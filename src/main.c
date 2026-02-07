@@ -1,4 +1,4 @@
-#include "memory.h"
+#include "lib/memory.h"
 #include "tokenizer.h"
 
 void print_int(int n);
