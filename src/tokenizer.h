@@ -28,17 +28,25 @@ typedef struct {
     unsigned int size;
 } CharStream;
 
-// Функции для работы с токенами
+typedef struct {
+    Token* data;
+    unsigned int cursor;
+    unsigned int size;
+} TokStream;
+
 void add_token(VecTokens* tokens, Token token);
 Token get_token(VecTokens* tokens, unsigned idx);
 
-// Функции для работы с потоком
 void skipWhitespace(CharStream* stream);
-char peek(CharStream* stream);
-char get(CharStream* stream);
-_Bool eof(CharStream* stream);
+char cs_peek(CharStream* stream);
+char cs_get(CharStream* stream);
+int cs_eof(CharStream* stream);
 
-// Парсинг токенов
+Token ts_peek(TokStream* stream);
+Token ts_get(TokStream* stream);
+int ts_eof(TokStream* stream);
+TokStream make_tokstream(VecTokens* tokens);
+
 Token parseTokInt(CharStream* stream);
 Token parseTokPlus(CharStream* stream);
 Token parseTokString(CharStream* stream);

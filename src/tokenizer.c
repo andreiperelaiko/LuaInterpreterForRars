@@ -31,10 +31,10 @@ Token get_token(VecTokens* tokens, unsigned idx){
 
 void skipWhitespace(CharStream* stream){
     while(
-        peek(stream) == ' ' ||
-        peek(stream) == '\n'
+        cs_peek(stream) == ' ' ||
+        cs_peek(stream) == '\n'
     ){
-        get(stream);
+        cs_get(stream);
     } 
 }
 
@@ -46,32 +46,51 @@ void set_cursor(CharStream* stream, unsigned int cursor){
     stream->cursor = cursor; 
 }
 
-char peek(CharStream* stream){
+char cs_peek(CharStream* stream){
     return stream->buffer[stream->cursor];
 }
 
-char get(CharStream* stream){
+char cs_get(CharStream* stream){
     char c = stream->buffer[stream->cursor];
     stream->cursor += 1;
     return c;
 }
 
-_Bool eof(CharStream* stream) {
+int cs_eof(CharStream* stream) {
     return stream->cursor >= stream->size;  
 }
 
-_Bool isdigit(char c){
+Token ts_peek(TokStream* stream){
+    return stream->data[stream->cursor];
+}
+
+Token ts_get(TokStream* stream){
+    Token t = stream->data[stream->cursor];
+    stream->cursor += 1;
+    return t;
+}
+
+int ts_eof(TokStream* stream){
+    return stream->cursor >= stream->size;
+}
+
+TokStream make_tokstream(VecTokens* tokens){
+    TokStream s = {.data = tokens->data, .cursor = 0, .size = tokens->size};
+    return s;
+}
+
+int isdigit(char c){
     return '0' <= c && c <= '9';
 }
 
 Token parseTokInt(CharStream* stream){
-    if (!isdigit(peek(stream)))  {
+    if (!isdigit(cs_peek(stream)))  {
         return error_token;
     }
     char* value = malloc(sizeof(char) * (MAX_INT_LENGTH + 1));
     int size = 0;
-    while(isdigit(peek(stream)) && size < 10) {
-        value[size] = get(stream);
+    while(isdigit(cs_peek(stream)) && size < 10) {
+        value[size] = cs_get(stream);
         size++; 
     }
     value[size] = '\0';
@@ -80,8 +99,8 @@ Token parseTokInt(CharStream* stream){
 }
 
 Token parseTokPlus(CharStream* stream){
-    if(peek(stream) == '+'){
-        get(stream);
+    if(cs_peek(stream) == '+'){
+        cs_get(stream);
         Token token = {TokPlus, 0};
         return token;
     }
@@ -89,28 +108,28 @@ Token parseTokPlus(CharStream* stream){
 }
 
 Token parseTokString(CharStream* stream){
-    if(peek(stream) != '\"'){
+    if(cs_peek(stream) != '\"'){
         return error_token;
     }
-    get(stream);
+    cs_get(stream);
     char* value = malloc(sizeof(char) * (1 + MAX_STRING_LENGTH));
     int size = 0;
-    while(!eof(stream) && peek(stream) != '\"'){
-        value[size] = get(stream); 
+    while(!cs_eof(stream) && cs_peek(stream) != '\"'){
+        value[size] = cs_get(stream); 
         size+= 1;
     }
-    if (eof(stream)){
+    if (cs_eof(stream)){
         return error_token;
     }
-    get(stream);
+    cs_get(stream);
     
     Token token = {TokString, value};
     return token;
 }
 
 Token parseTokLParen(CharStream* stream){
-    if(peek(stream) == '('){
-        get(stream);
+    if(cs_peek(stream) == '('){
+        cs_get(stream);
         Token token = {TokLParen, 0};
         return token;
     }
@@ -118,8 +137,8 @@ Token parseTokLParen(CharStream* stream){
 }
 
 Token parseTokRParen(CharStream* stream){
-    if (peek(stream) == '('){
-        get(stream);
+    if (cs_peek(stream) == ')'){
+        cs_get(stream);
         Token token = {TokRParen, 0};
         return token;
     }
@@ -127,8 +146,8 @@ Token parseTokRParen(CharStream* stream){
 }
 
 Token parseTokStar(CharStream* stream){
-    if (peek(stream) == '*'){
-        get(stream);
+    if (cs_peek(stream) == '*'){
+        cs_get(stream);
         Token token = {TokStar, 0};
         return token;
     }
@@ -137,13 +156,16 @@ Token parseTokStar(CharStream* stream){
 
 VecTokens tokenize(CharStream* stream){
     VecTokens tokens = {.data = 0, .size = 0, .capacity = 0};
-    while(!eof(stream)) {
+    while(!cs_eof(stream)) {
         skipWhitespace(stream);
         Token token;
         if((token = parseTokInt(stream)).type != TokError) {
             add_token(&tokens, token);
         }
         else if((token = parseTokPlus(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokStar(stream)).type != TokError) {
             add_token(&tokens, token);
         }
     }
