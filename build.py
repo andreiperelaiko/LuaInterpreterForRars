@@ -126,16 +126,34 @@ class RarsAdapter:
         return header + '\n' + '\n\n'.join(parts) + '\n'
 
 
-if __name__ == "__main__":
+MAIN_SOURCES = [
+    Path("src/main.c"),
+    Path("src/tokenizer.c"),
+    Path("src/parser.c"),
+    Path("src/lib/io.S"),
+    Path("src/lib/memory.S"),
+]
+
+LIB_SOURCES = [
+    Path("src/lib/string.c"),
+    Path("src/lib/test.c"),
+    Path("src/lib/io.S"),
+    Path("src/lib/memory.S"),
+]
+
+TEST_CONFIGS = {
+    "tokenizer": {
+        "sources": [
+            Path("tests/test_tokenizer.c"),
+            Path("src/tokenizer.c"),
+        ] + LIB_SOURCES,
+        "output": "test_tokenizer.s",
+    },
+}
+
+def build(sources, output):
     fm = FileManager()
     tfs = TempFileSystem()
-    sources = [
-        Path("src/main.c"),
-        Path("src/tokenizer.c"),
-        Path("src/lib/io.S"),
-        Path("src/lib/memory.S"),
-    ]
-
     compiler = RiscVCompiler()
     adapter = RarsAdapter()
     parts = []
@@ -153,5 +171,11 @@ if __name__ == "__main__":
             parts.append(raw)
 
     program = adapter.combine(parts)
-    fm.write("program.s", program)
-    print(f"program.s ({program.count(chr(10))} lines)")
+    fm.write(output, program)
+    print(f"{output} ({program.count(chr(10))} lines)")
+
+if __name__ == "__main__":
+    build(MAIN_SOURCES, "program.s")
+    for test_name, cfg in TEST_CONFIGS.items():
+        print(f"--- test: {test_name} ---")
+        build(cfg["sources"], cfg["output"])
