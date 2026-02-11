@@ -48,10 +48,16 @@ class TempFileSystem:
             self.file_manager.remove(file) 
 
 class RiscVCompiler:
+    GCC_NAMES = ["riscv64-elf-gcc", "riscv64-unknown-elf-gcc"]
+
     def __init__(self):
-        self.gcc = shutil.which("riscv64-elf-gcc")
+        self.gcc = None
+        for name in self.GCC_NAMES:
+            self.gcc = shutil.which(name)
+            if self.gcc:
+                break
         if not self.gcc:
-            raise Exception("Cannot find riscv64-elf-gcc")
+            raise Exception("Cannot find riscv64 gcc: tried " + ", ".join(self.GCC_NAMES))
 
     def compile(self, input_file, output_file, include_dirs=None):
         cmd = [
