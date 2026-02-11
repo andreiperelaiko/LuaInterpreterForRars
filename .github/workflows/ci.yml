@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install riscv64-elf-gcc
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-riscv64-unknown-elf
+
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 17
+
+    - name: Download RARS
+      run: |
+        curl -L -o rars.jar https://github.com/TheThirdOne/rars/releases/download/v1.6/rars1_6.jar
+
+    - name: Build
+      run: python3 build.py
+
+    - name: Run tests
+      run: java -jar rars.jar test_tokenizer.s
