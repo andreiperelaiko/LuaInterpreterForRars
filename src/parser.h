@@ -4,6 +4,7 @@ typedef enum {
     ADD,
     MUL,
     NUM,
+    ID,
 } ASTNodeType;
 
 typedef struct ASTNode ASTNode;
@@ -17,13 +18,20 @@ typedef struct{
     const char* value; 
 } Number;
 
+typedef struct{
+    const char* value;
+} Ident;
+
 struct ASTNode {
     ASTNodeType type; 
     union {
         Number number;
+        Ident ident;
         BinOp binop;
     } data;
 };
+
+const char* ast_dump(const ASTNode* root);
 
 ASTNodeType convert(TokenType type);
 int is_operator(TokenType type);

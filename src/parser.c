@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "lib/memory.h"
+#include "lib/string.h"
 
 int is_operator(TokenType type){
     switch (type){
@@ -66,7 +67,41 @@ ASTNode* parse_nud(TokStream* stream){
             node->data.number.value = token.value;
             return node;
         }
+        case TokIdent: {
+            ts_get(stream);
+            ASTNode* node = malloc(sizeof(*node));
+            node->type = ID;
+            node->data.ident.value = token.value;
+        }
         default:
             return 0;
+    }
+}
+
+const char* ast_dump(const ASTNode* root){
+    if (root == 0) return "null";
+    switch (root->type){
+        case NUM: {
+            char* s = str_concat("{\"type\":\"NUM\",\"value\":\"", root->data.number.value);
+            return str_concat(s, "\"}");
+        }
+        case ID: {
+            char* s = str_concat("{\"type\":\"ID\",\"value\":\"", root->data.ident.value);
+            return str_concat(s, "\"}");
+        }
+        case ADD:
+        case MUL: {
+            const char* type = root->type == ADD ? "ADD" : "MUL";
+            const char* lhs = ast_dump(root->data.binop.lhs);
+            const char* rhs = ast_dump(root->data.binop.rhs);
+            char* s = str_concat("{\"type\":\"", type);
+            s = str_concat(s, "\",\"lhs\":");
+            s = str_concat(s, lhs);
+            s = str_concat(s, ",\"rhs\":");
+            s = str_concat(s, rhs);
+            return str_concat(s, "}");
+        }
+        default:
+            return "null";
     }
 }

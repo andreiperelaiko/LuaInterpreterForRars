@@ -9,6 +9,7 @@ typedef enum {
     TokLParen,
     TokRParen,
     TokStar,
+    TokIdent,
 } TokenType;
 
 typedef struct {
@@ -53,6 +54,7 @@ Token parseTokString(CharStream* stream);
 Token parseTokLParen(CharStream* stream);
 Token parseTokRParen(CharStream* stream);
 Token parseTokStar(CharStream* stream);
+Token parseTokIdent(CharStream* stream);
 VecTokens tokenize(CharStream* stream);
 
 extern Token error_token;
