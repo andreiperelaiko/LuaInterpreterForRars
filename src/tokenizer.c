@@ -4,6 +4,7 @@
 
 #define MAX_INT_LENGTH 10
 #define MAX_STRING_LENGTH 100
+#define MAX_IDENTIFIER_LENGTH 100
 
 Token error_token = {.type = TokError, .value = 0};
 
@@ -83,6 +84,11 @@ int isdigit(char c){
     return '0' <= c && c <= '9';
 }
 
+int isalpha(char c){
+    return ('a' <= c && c <= 'z') ||
+            ('A' <= c && c <= 'Z');
+}
+
 Token parseTokInt(CharStream* stream){
     if (!isdigit(cs_peek(stream)))  {
         return error_token;
@@ -154,6 +160,20 @@ Token parseTokStar(CharStream* stream){
     return error_token;
 }
 
+Token parseTokIdent(CharStream* stream){
+    if (isalpha(cs_peek(stream))){
+        char* name = malloc(sizeof(*name) * MAX_IDENTIFIER_LENGTH);
+        Token token = {TokIdent, name};
+        unsigned int size = 0; 
+        while (isalpha(cs_peek(stream))) {
+            name[size] = cs_get(stream);
+            size+= 1; 
+        }
+        return token;
+    } 
+   return error_token;
+}
+
 VecTokens tokenize(CharStream* stream){
     VecTokens tokens = {.data = 0, .size = 0, .capacity = 0};
     while(!cs_eof(stream)) {
@@ -166,6 +186,9 @@ VecTokens tokenize(CharStream* stream){
             add_token(&tokens, token);
         }
         else if((token = parseTokStar(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokIdent(stream)).type != TokError) {
             add_token(&tokens, token);
         }
     }
