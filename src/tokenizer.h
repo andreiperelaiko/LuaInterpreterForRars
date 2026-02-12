@@ -1,6 +1,10 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
+#define MAX_INT_LENGTH 10
+#define MAX_STRING_LENGTH 100
+#define MAX_IDENTIFIER_LENGTH 100
+
 typedef enum {
     TokError,
     TokPlus,
@@ -42,6 +46,8 @@ void skipWhitespace(CharStream* stream);
 char cs_peek(CharStream* stream);
 char cs_get(CharStream* stream);
 int cs_eof(CharStream* stream);
+unsigned int get_cursor(CharStream* stream);
+void set_cursor(CharStream* stream, unsigned int cursor);
 
 Token ts_peek(TokStream* stream);
 Token ts_get(TokStream* stream);
