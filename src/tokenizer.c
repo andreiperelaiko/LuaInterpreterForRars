@@ -2,10 +2,6 @@
 #include "tokenizer.h"
 
 
-#define MAX_INT_LENGTH 10
-#define MAX_STRING_LENGTH 100
-#define MAX_IDENTIFIER_LENGTH 100
-
 Token error_token = {.type = TokError, .value = 0};
 
 void extVecTokens(VecTokens* tokens){
