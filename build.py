@@ -145,9 +145,18 @@ LIB_SOURCES = [
     Path("src/lib/test.c"),
     Path("src/lib/io.S"),
     Path("src/lib/memory.S"),
+    Path("src/lib/fstream.S"),
 ]
 
 TEST_CONFIGS = {
+    "parser": {
+        "sources" : [
+            Path("tests/parser/test_parser.c"),
+            Path("src/parser.c"),
+            Path("src/tokenizer.c"),
+        ] + LIB_SOURCES,
+        "output": "test_parser.s"
+    },
     "tokenizer": {
         "sources": [
             Path("tests/test_tokenizer.c"),
