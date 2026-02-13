@@ -6,6 +6,7 @@
 .globl lseek
 
 open:
+    li a1, 0
     li a7, 1024
     ecall
     ret

@@ -1,0 +1,11 @@
+{
+    "type": "ADD",
+    "lhs": {
+        "type": "NUM",
+        "value": "1"
+    },
+    "rhs": {
+        "type": "NUM",
+        "value": "1"
+    }
+}

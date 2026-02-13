@@ -1,0 +1,46 @@
+{
+    "type": "ADD",
+    "lhs": {
+        "type": "ADD",
+        "lhs": {
+            "type": "ADD",
+            "lhs": {
+                "type": "NUM",
+                "value": "1"
+            },
+            "rhs": {
+                "type": "MUL",
+                "lhs": {
+                    "type": "NUM",
+                    "value": "2"
+                },
+                "rhs": {
+                    "type": "NUM",
+                    "value": "3"
+                }
+            }
+        },
+        "rhs": {
+            "type": "MUL",
+            "lhs": {
+                "type": "MUL",
+                "lhs": {
+                    "type": "NUM",
+                    "value": "4"
+                },
+                "rhs": {
+                    "type": "NUM",
+                    "value": "5"
+                }
+            },
+            "rhs": {
+                "type": "NUM",
+                "value": "6"
+            }
+        }
+    },
+    "rhs": {
+        "type": "NUM",
+        "value": "7"
+    }
+}

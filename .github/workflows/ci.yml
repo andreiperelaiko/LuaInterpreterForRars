@@ -29,5 +29,8 @@ jobs:
     - name: Build
       run: python3 build.py
 
-    - name: Run tests
+    - name: Run tokenizer tests
       run: java -jar rars.jar test_tokenizer.s
+    
+    - name: Run parser tests
+      run: java -jar rars.jar test_parser.s
