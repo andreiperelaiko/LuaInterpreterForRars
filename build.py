@@ -135,12 +135,14 @@ class RarsAdapter:
 MAIN_SOURCES = [
     Path("src/main.c"),
     Path("src/tokenizer.c"),
+    Path("src/ast.c"),
     Path("src/parser.c"),
     Path("src/lib/io.S"),
     Path("src/lib/memory.S"),
 ]
 
 LIB_SOURCES = [
+    Path("src/lib/char_stream.c"),
     Path("src/lib/string.c"),
     Path("src/lib/test.c"),
     Path("src/lib/io.S"),
@@ -153,6 +155,7 @@ TEST_CONFIGS = {
         "sources" : [
             Path("tests/parser/test_parser.c"),
             Path("src/parser.c"),
+            Path("src/ast.c"),
             Path("src/tokenizer.c"),
         ] + LIB_SOURCES,
         "output": "test_parser.s"

@@ -1,0 +1,9 @@
+{
+    "type": "OR",
+    "lhs": {"type": "ID", "value": "a"},
+    "rhs": {
+        "type": "AND",
+        "lhs": {"type": "ID", "value": "b"},
+        "rhs": {"type": "ID", "value": "c"}
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "type": "CALL",
+    "calle": {
+        "type": "ID",
+        "value": "foo"
+    },
+    "args": []
+}

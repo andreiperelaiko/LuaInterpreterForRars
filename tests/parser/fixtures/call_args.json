@@ -1,0 +1,12 @@
+{
+    "type": "CALL",
+    "calle": {
+        "type": "ID",
+        "value": "foo"
+    },
+    "args": [
+        {"type": "NUM", "value": "1"},
+        {"type": "NUM", "value": "2"},
+        {"type": "NUM", "value": "3"}
+    ]
+}

@@ -1,0 +1,9 @@
+{
+    "type": "MUL",
+    "lhs": {
+        "type": "EXP",
+        "lhs": {"type": "NUM", "value": "2"},
+        "rhs": {"type": "NUM", "value": "3"}
+    },
+    "rhs": {"type": "NUM", "value": "4"}
+}

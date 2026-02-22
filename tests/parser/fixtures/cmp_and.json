@@ -1,0 +1,13 @@
+{
+    "type": "AND",
+    "lhs": {
+        "type": "LT",
+        "lhs": {"type": "ID", "value": "a"},
+        "rhs": {"type": "ID", "value": "b"}
+    },
+    "rhs": {
+        "type": "GT",
+        "lhs": {"type": "ID", "value": "c"},
+        "rhs": {"type": "ID", "value": "d"}
+    }
+}

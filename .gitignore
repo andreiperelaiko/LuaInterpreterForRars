@@ -1,0 +1,7 @@
+__pycache__/
+.cache/
+doc/
+/*.s
+/*.jar
+.vscode
+compile_commands.json

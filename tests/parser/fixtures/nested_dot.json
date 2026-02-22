@@ -1,0 +1,18 @@
+{
+    "type": "IDX",
+    "container": {
+        "type": "IDX",
+        "container": {
+            "type": "ID",
+            "value": "foo"
+        },
+        "index": {
+            "type": "ID",
+            "value": "bar"
+        }
+    },
+    "index": {
+        "type": "ID",
+        "value": "baz"
+    }
+}
