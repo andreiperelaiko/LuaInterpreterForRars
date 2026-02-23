@@ -1,0 +1,19 @@
+{
+    "type": "CALL",
+    "calle": {
+        "type": "ID",
+        "value": "foo"
+    },
+    "args": [
+        {
+            "type": "CALL",
+            "calle": {
+                "type": "ID",
+                "value": "bar"
+            },
+            "args": [
+                {"type": "NUM", "value": "1"}
+            ]
+        }
+    ]
+}

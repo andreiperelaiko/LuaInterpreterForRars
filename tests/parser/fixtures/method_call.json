@@ -1,0 +1,18 @@
+{
+    "type": "CALL",
+    "calle": {
+        "type": "IDX",
+        "container": {
+            "type": "ID",
+            "value": "foo"
+        },
+        "index": {
+            "type": "ID",
+            "value": "bar"
+        }
+    },
+    "args": [
+        {"type": "NUM", "value": "1"},
+        {"type": "NUM", "value": "2"}
+    ]
+}

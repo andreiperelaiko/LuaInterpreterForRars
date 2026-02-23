@@ -1,0 +1,13 @@
+{
+    "type": "OR",
+    "lhs": {
+        "type": "EQ",
+        "lhs": {"type": "ID", "value": "a"},
+        "rhs": {"type": "ID", "value": "b"}
+    },
+    "rhs": {
+        "type": "NEQ",
+        "lhs": {"type": "ID", "value": "c"},
+        "rhs": {"type": "ID", "value": "d"}
+    }
+}
