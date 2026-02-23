@@ -28,11 +28,12 @@ typedef enum {
     TokColon,     // :
     TokLBracket,  // [
     TokRBracket,  // ]
-    TokString,
-    TokLParen,
-    TokRParen,
-    TokStar,
+    TokNot,       // not
+    TokLParen,    // (
+    TokRParen,    // )
+    TokStar,      // *
     TokIdent,
+    TokString,
 } TokenType;
 
 typedef struct {
@@ -82,6 +83,7 @@ Token parseTokPlus(CharStream* stream);
 Token parseTokString(CharStream* stream);
 Token parseTokLParen(CharStream* stream);
 Token parseTokRParen(CharStream* stream);
+Token parseTokNot(CharStream* stream);
 Token parseTokStar(CharStream* stream);
 Token parseTokIdent(CharStream* stream);
 VecTokens tokenize(CharStream* stream);

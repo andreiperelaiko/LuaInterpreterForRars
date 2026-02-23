@@ -1,0 +1,7 @@
+{
+    "type": "NOT",
+    "value": {
+        "type": "ID",
+        "value": "a"
+    }
+}

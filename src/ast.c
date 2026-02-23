@@ -1,5 +1,6 @@
 #include "ast.h"
 #include "lib/char_stream.h"
+#include "lib/test.h"
 #include "tokenizer.h"
 #include "lib/memory.h"
 #include "lib/string.h"
@@ -11,6 +12,7 @@ static const char *type_names[] = {
 	[GEQ] = "GEQ", [LT] = "LT",   [GT] = "GT",   [AND] = "AND",
 	[OR] = "OR",   [NUM] = "NUM",  [ID] = "ID",   [STRING] = "STRING",
 	[IDX] = "IDX", [CALL] = "CALL",
+	[NOT] = "NOT", [NEG] = "NEG",
 };
 
 #define TYPE_NAMES_COUNT (sizeof(type_names) / sizeof(type_names[0]))
@@ -39,6 +41,15 @@ int is_binop_type(ASTNodeType type) {
 		return 1;
 	default:
 		return 0;
+	}
+}
+int is_unop_type(ASTNodeType type){
+	switch(type){
+		case NEG:
+		case NOT:
+			return 1;
+		default:
+			return 0;
 	}
 }
 
@@ -88,11 +99,22 @@ const char* binop_dump(const ASTNode* root){
 	s = str_concat(s, rhs);
 	return str_concat(s, "}");
 }
+const char* unop_dump(const ASTNode* root){
+	if (!is_unop_type(root->type)) return "null";
+	const char *type = ast_type_name(root->type);
+	const char *value = ast_dump(root->data.unop.value);
+	char *s = str_concat("{\"type\":\"", type);
+	s = str_concat(s, "\",\"value\":");
+	s = str_concat(s, value);
+	s = str_concat(s, "}");
+	return s;
+}
 
 typedef const char* (*dumper)(const ASTNode* root);
 
 const char *ast_dump(const ASTNode *root) {
 	static dumper dumpers[] = {
+		[NEG] = unop_dump, [NOT] = unop_dump,
 		[ADD] = binop_dump, [SUB] = binop_dump,
 		[MUL] = binop_dump, [DIV] = binop_dump,
 		[EXP] = binop_dump, [EQ]  = binop_dump,
@@ -174,6 +196,19 @@ int binop_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
 	result->type = type;
 	result->data.binop.lhs = lhs;
 	result->data.binop.rhs = rhs;
+	return 1;
+}
+
+int unop_load(CharStream *stream, ASTNode* result, ASTNodeType type){
+	if (!try_consume_with_ws(stream, ",\"value\":")) {
+		return 0;
+	}
+	ASTNode* value = json_load_block(stream);
+	if(!value){
+		return 0;
+	}
+	result->type = type;
+	result->data.unop.value = value;
 	return 1;
 }
 
@@ -278,6 +313,7 @@ int call_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
 typedef int (*loader)(CharStream *stream, ASTNode *result, ASTNodeType type);
 
 static loader loaders[] = {
+	[NEG] = unop_load, [NOT] = unop_load,
 	[ADD] = binop_load, [SUB] = binop_load,
 	[MUL] = binop_load, [DIV] = binop_load,
 	[EXP] = binop_load, [EQ]  = binop_load,

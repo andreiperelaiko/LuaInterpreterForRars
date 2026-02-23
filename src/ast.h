@@ -21,6 +21,8 @@ typedef enum {
     STRING,
     IDX,
     CALL,
+    NOT,
+    NEG,
 } ASTNodeType;
 
 typedef struct ASTNode ASTNode;
@@ -29,6 +31,10 @@ typedef struct{
     ASTNode* lhs;
     ASTNode* rhs; 
 } BinOp;
+
+typedef struct{
+    const ASTNode* value;
+} UnOp;
 
 typedef struct{
     const char* value; 
@@ -61,6 +67,7 @@ struct ASTNode {
         Ident ident;
         String string;
         BinOp binop;
+        UnOp unop;
         Index index;
         Call call;
     } data;

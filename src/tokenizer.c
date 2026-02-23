@@ -283,6 +283,25 @@ Token parseTokDDot(CharStream* stream){
     return error_token;
 }
 
+Token parseTokNot(CharStream* stream){
+    unsigned int saved = get_cursor(stream);
+    if (cs_peek(stream) == 'n'){
+        cs_get(stream);
+        if (!cs_eof(stream) && cs_peek(stream) == 'o'){
+            cs_get(stream);
+            if (!cs_eof(stream) && cs_peek(stream) == 't'){
+                cs_get(stream);
+                if (cs_eof(stream) || !isalpha(cs_peek(stream))){
+                    Token token = {TokNot, 0};
+                    return token;
+                }
+            }
+        }
+    }
+    set_cursor(stream, saved);
+    return error_token;
+}
+
 Token parseTokAnd(CharStream* stream){
     unsigned int saved = get_cursor(stream);
     if (cs_peek(stream) == 'a'){
@@ -355,6 +374,9 @@ VecTokens tokenize(CharStream* stream){
             add_token(&tokens, token);
         }
         else if((token = parseTokDDot(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokNot(stream)).type != TokError) {
             add_token(&tokens, token);
         }
         else if((token = parseTokAnd(stream)).type != TokError) {
