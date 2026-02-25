@@ -164,6 +164,13 @@ ASTNode *nud_string(TokStream *stream) {
 	return node;
 }
 
+ASTNode *nud_nil(TokStream *stream) {
+	ts_get(stream);
+	ASTNode *node = malloc(sizeof(*node));
+	node->type = NIL;
+	return node;
+}
+
 ASTNode* nud_not(TokStream* stream){
 	ts_get(stream);
 	ASTNode* node = malloc(sizeof(*node));
@@ -196,6 +203,7 @@ static nud_parser nud_parsers[TOKEN_TYPE_COUNT] = {
 	[TokInt] = nud_int,
 	[TokIdent] = parse_ident,
 	[TokString] = nud_string,
+	[TokNil] = nud_nil,
 	[TokLParen] = nud_paren,
 	[TokNot] = nud_not,
 	[TokMinus] = nud_neg,

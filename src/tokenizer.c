@@ -424,6 +424,14 @@ Token parseTokFunction(CharStream* stream){
     return error_token;
 }
 
+Token parseTokNil(CharStream* stream){
+    if (try_parse_keyword(stream, "nil")){
+        Token token = {TokNil, 0};
+        return token;
+    }
+    return error_token;
+}
+
 VecTokens tokenize(CharStream* stream){
     VecTokens tokens = {.data = 0, .size = 0, .capacity = 0};
     while(!cs_eof(stream)) {
@@ -479,6 +487,9 @@ VecTokens tokenize(CharStream* stream){
             add_token(&tokens, token);
         }
         else if((token = parseTokFunction(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokNil(stream)).type != TokError) {
             add_token(&tokens, token);
         }
         else if((token = parseTokAnd(stream)).type != TokError) {

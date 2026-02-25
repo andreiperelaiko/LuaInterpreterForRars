@@ -1,0 +1,1 @@
+{"type":"ASSIGN_STMT","lhs":{"type":"ID","value":"x"},"rhs":{"type":"NIL"}}

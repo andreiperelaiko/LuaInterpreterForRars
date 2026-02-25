@@ -16,6 +16,7 @@ typedef enum {
     GT,
     AND,
     OR,
+    NIL,
     NUM,
     ID,
     STRING,
