@@ -1,0 +1,1 @@
+{"type":"CALL_STMT","call":{"type":"CALL","calle":{"type":"IDX","container":{"type":"ID","value":"obj"},"index":{"type":"ID","value":"method"}},"args":[{"type":"NUM","value":"1"},{"type":"NUM","value":"2"}]}}

@@ -1,0 +1,1 @@
+{"type":"WHILE","cond":{"type":"ID","value":"a"},"body":{"type":"BLOCK","body":[]}}

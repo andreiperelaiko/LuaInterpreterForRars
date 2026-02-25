@@ -1,0 +1,1 @@
+{"type":"ASSIGN_STMT","lhs":{"type":"IDX","container":{"type":"ID","value":"foo"},"index":{"type":"ID","value":"bar"}},"rhs":{"type":"ID","value":"baz"}}

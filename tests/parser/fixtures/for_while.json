@@ -1,0 +1,1 @@
+{"type":"FOR","name":"x","in":{"type":"ID","value":"xs"},"body":{"type":"BLOCK","body":[{"type":"WHILE","cond":{"type":"ID","value":"ok"},"body":{"type":"BLOCK","body":[]}}]}}

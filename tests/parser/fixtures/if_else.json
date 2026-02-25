@@ -1,0 +1,1 @@
+{"type":"IF","cond":{"type":"ID","value":"a"},"then":{"type":"BLOCK","body":[]},"else":{"type":"BLOCK","body":[]}}

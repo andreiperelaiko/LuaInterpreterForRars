@@ -23,7 +23,16 @@ typedef enum {
     CALL,
     NOT,
     NEG,
+    IF_STMT,
+    BLOCK,
+    WHILE_STMT,
+    FOR_STMT,
+    CALL_STMT,
+    ASSIGN_STMT,
+    FUNC_STMT,
 } ASTNodeType;
+
+#define AST_NODE_TYPE_COUNT (FUNC_STMT + 1)
 
 typedef struct ASTNode ASTNode;
 
@@ -59,6 +68,45 @@ typedef struct{
     unsigned int args_cnt;
 } Call;
 
+#define MAX_BLOCK_STMTS 100
+typedef struct{
+    ASTNode** stmts;
+    unsigned int stmts_cnt;
+} Block;
+
+typedef struct{
+    ASTNode* cond;
+    ASTNode* then_block;
+    ASTNode* else_block;
+} IfNode;
+
+typedef struct{
+    ASTNode* cond;
+    ASTNode* body;
+} WhileNode;
+
+typedef struct{
+    const char* name;
+    ASTNode* iterable;
+    ASTNode* body;
+} ForNode;
+
+typedef struct{
+    ASTNode* call;
+} CallStmt;
+
+typedef struct{
+    ASTNode* lhs;
+    ASTNode* rhs;
+} AssignStmt;
+
+#define MAX_FUNC_PARAMS 16
+typedef struct{
+    const char* name;
+    const char** params;
+    unsigned int params_cnt;
+    ASTNode* body;
+} FuncStmt;
 
 struct ASTNode {
     ASTNodeType type; 
@@ -70,6 +118,13 @@ struct ASTNode {
         UnOp unop;
         Index index;
         Call call;
+        Block block;
+        IfNode if_node;
+        WhileNode while_node;
+        ForNode for_node;
+        CallStmt call_stmt;
+        AssignStmt assign_stmt;
+        FuncStmt func_stmt;
     } data;
 };
 

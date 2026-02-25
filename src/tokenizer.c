@@ -27,6 +27,9 @@ Token get_token(VecTokens* tokens, unsigned idx){
 }
 
 Token ts_peek(TokStream* stream){
+    if (stream->cursor >= stream->size){
+        return error_token;
+    }
     return stream->data[stream->cursor];
 }
 
@@ -52,6 +55,24 @@ int isdigit(char c){
 int isalpha(char c){
     return ('a' <= c && c <= 'z') ||
             ('A' <= c && c <= 'Z');
+}
+
+int try_parse_keyword(CharStream* stream, const char* keyword){
+    unsigned int saved = get_cursor(stream);
+    int i = 0;
+    while (keyword[i] != '\0'){
+        if (cs_eof(stream) || cs_peek(stream) != keyword[i]){
+            set_cursor(stream, saved);
+            return 0;
+        }
+        cs_get(stream);
+        i += 1;
+    }
+    if (!cs_eof(stream) && isalpha(cs_peek(stream))){
+        set_cursor(stream, saved);
+        return 0;
+    }
+    return 1;
 }
 
 Token parseTokInt(CharStream* stream){
@@ -147,6 +168,15 @@ Token parseTokExpr(CharStream* stream){
     if (cs_peek(stream) == '^'){
         cs_get(stream);
         Token token = {TokExp, 0};
+        return token;
+    }
+    return error_token;
+}
+
+Token parseTokAssign(CharStream* stream){
+    if (cs_peek(stream) == '='){
+        cs_get(stream);
+        Token token = {TokAssign, 0};
         return token;
     }
     return error_token;
@@ -284,56 +314,26 @@ Token parseTokDDot(CharStream* stream){
 }
 
 Token parseTokNot(CharStream* stream){
-    unsigned int saved = get_cursor(stream);
-    if (cs_peek(stream) == 'n'){
-        cs_get(stream);
-        if (!cs_eof(stream) && cs_peek(stream) == 'o'){
-            cs_get(stream);
-            if (!cs_eof(stream) && cs_peek(stream) == 't'){
-                cs_get(stream);
-                if (cs_eof(stream) || !isalpha(cs_peek(stream))){
-                    Token token = {TokNot, 0};
-                    return token;
-                }
-            }
-        }
+    if (try_parse_keyword(stream, "not")){
+        Token token = {TokNot, 0};
+        return token;
     }
-    set_cursor(stream, saved);
     return error_token;
 }
 
 Token parseTokAnd(CharStream* stream){
-    unsigned int saved = get_cursor(stream);
-    if (cs_peek(stream) == 'a'){
-        cs_get(stream);
-        if (!cs_eof(stream) && cs_peek(stream) == 'n'){
-            cs_get(stream);
-            if (!cs_eof(stream) && cs_peek(stream) == 'd'){
-                cs_get(stream);
-                if (cs_eof(stream) || !isalpha(cs_peek(stream))){
-                    Token token = {TokAnd, 0};
-                    return token;
-                }
-            }
-        }
+    if (try_parse_keyword(stream, "and")){
+        Token token = {TokAnd, 0};
+        return token;
     }
-    set_cursor(stream, saved);
     return error_token;
 }
 
 Token parseTokOr(CharStream* stream){
-    unsigned int saved = get_cursor(stream);
-    if (cs_peek(stream) == 'o'){
-        cs_get(stream);
-        if (!cs_eof(stream) && cs_peek(stream) == 'r'){
-            cs_get(stream);
-            if (cs_eof(stream) || !isalpha(cs_peek(stream))){
-                Token token = {TokOr, 0};
-                return token;
-            }
-        }
+    if (try_parse_keyword(stream, "or")){
+        Token token = {TokOr, 0};
+        return token;
     }
-    set_cursor(stream, saved);
     return error_token;
 }
 
@@ -352,6 +352,78 @@ Token parseTokIdent(CharStream* stream){
    return error_token;
 }
 
+Token parseTokIf(CharStream* stream){
+    if (try_parse_keyword(stream, "if")){
+        Token token = {TokIf, 0};
+        return token;
+    }
+    return error_token;
+}
+
+Token parseTokThen(CharStream* stream){
+    if (try_parse_keyword(stream, "then")){
+        Token token = {TokThen, 0};
+        return token;
+    }
+    return error_token;
+}
+
+Token parseTokElse(CharStream* stream){
+    if (try_parse_keyword(stream, "else")){
+        Token token = {TokElse, 0};
+        return token;
+    }
+    return error_token;
+}
+
+Token parseTokEnd(CharStream* stream){
+    if (try_parse_keyword(stream, "end")){
+        Token token = {TokEnd, 0};
+        return token;
+    }
+    return error_token;
+}
+
+Token parseTokWhile(CharStream* stream){
+    if (try_parse_keyword(stream, "while")){
+        Token token = {TokWhile, 0};
+        return token;
+    }
+    return error_token;
+}
+
+Token parseTokFor(CharStream* stream){
+    if (try_parse_keyword(stream, "for")){
+        Token token = {TokFor, 0};
+        return token;
+    }
+    return error_token;
+}
+
+Token parseTokDo(CharStream* stream){
+    if (try_parse_keyword(stream, "do")){
+        Token token = {TokDo, 0};
+        return token;
+    }
+    return error_token;
+}
+
+Token parseTokIn(CharStream* stream){
+    if (try_parse_keyword(stream, "in")){
+        Token token = {TokIn, 0};
+        return token;
+    }
+    return error_token;
+}
+
+Token parseTokFunction(CharStream* stream){
+    if (try_parse_keyword(stream, "function")){
+        Token token = {TokFunction, 0};
+        return token;
+    }
+    return error_token;
+}
+
 VecTokens tokenize(CharStream* stream){
     VecTokens tokens = {.data = 0, .size = 0, .capacity = 0};
     while(!cs_eof(stream)) {
@@ -362,6 +434,9 @@ VecTokens tokenize(CharStream* stream){
             add_token(&tokens, token);
         }
         else if((token = parseTokEqual(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokAssign(stream)).type != TokError) {
             add_token(&tokens, token);
         }
         else if((token = parseTokNotequal(stream)).type != TokError) {
@@ -377,6 +452,33 @@ VecTokens tokenize(CharStream* stream){
             add_token(&tokens, token);
         }
         else if((token = parseTokNot(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokIf(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokThen(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokElse(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokEnd(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokWhile(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokFor(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokDo(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokIn(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokFunction(stream)).type != TokError) {
             add_token(&tokens, token);
         }
         else if((token = parseTokAnd(stream)).type != TokError) {
