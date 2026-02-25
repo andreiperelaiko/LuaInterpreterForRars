@@ -10,7 +10,7 @@ static const char *type_names[AST_NODE_TYPE_COUNT] = {
 	[ADD] = "ADD", [MUL] = "MUL", [DIV] = "DIV", [SUB] = "SUB",
 	[EXP] = "EXP", [EQ] = "EQ",   [NEQ] = "NEQ", [LEQ] = "LEQ",
 	[GEQ] = "GEQ", [LT] = "LT",   [GT] = "GT",   [AND] = "AND",
-	[OR] = "OR",   [NUM] = "NUM",  [ID] = "ID",   [STRING] = "STRING",
+	[OR] = "OR",   [NIL] = "NIL",  [NUM] = "NUM",  [ID] = "ID",   [STRING] = "STRING",
 	[IDX] = "IDX", [CALL] = "CALL",
 	[NOT] = "NOT", [NEG] = "NEG",
 	[IF_STMT] = "IF", [BLOCK] = "BLOCK",
@@ -59,6 +59,10 @@ const char* num_dump(const ASTNode* root){
 	char *s = str_concat("{\"type\":\"NUM\",\"value\":\"",
 							root->data.number.value);
 	return str_concat(s, "\"}");
+}
+const char* nil_dump(const ASTNode* root){
+	(void)root;
+	return "{\"type\":\"NIL\"}";
 }
 const char* id_dump(const ASTNode* root){
 	char *s =
@@ -186,6 +190,7 @@ const char *ast_dump(const ASTNode *root) {
 		[GEQ] = binop_dump, [LT]  = binop_dump,
 		[GT]  = binop_dump, [AND] = binop_dump,
 		[OR]  = binop_dump,
+		[NIL] = nil_dump,
 		[NUM] = num_dump,
 		[ID]  = id_dump,
 		[STRING] = string_dump,
@@ -289,6 +294,12 @@ int num_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
 	const char *val = json_read_string(stream);
 	result->type = type;
 	result->data.number.value = val;
+	return 1;
+}
+
+int nil_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
+	(void)stream;
+	result->type = type;
 	return 1;
 }
 
@@ -563,6 +574,7 @@ static loader loaders[AST_NODE_TYPE_COUNT] = {
 	[GEQ] = binop_load, [LT]  = binop_load,
 	[GT]  = binop_load, [AND] = binop_load,
 	[OR]  = binop_load,
+	[NIL] = nil_load,
 	[NUM] = num_load,
 	[ID]  = id_load,
 	[STRING] = string_load,

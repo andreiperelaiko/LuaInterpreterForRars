@@ -31,7 +31,7 @@ TokStream get_t_stream(const char* lua_code){
 }
 
 TEST(test_expr){
-    const char* cases[] = {"num", "sum", "mul", "long_sum", "sum_mul_precedence", 0};
+    const char* cases[] = {"num", "nil", "sum", "mul", "long_sum", "sum_mul_precedence", 0};
     char* lua_buf = malloc(MAX_TEST_SIZE);
     char* json_buf = malloc(MAX_TEST_SIZE);
 
@@ -143,7 +143,7 @@ TEST(test_loops){
 }
 
 TEST(test_stmt_call_assign){
-    const char* cases[] = {"stmt_call", "stmt_assign", "stmt_assign_expr", "stmt_assign_index", "stmt_call_chain", 0};
+    const char* cases[] = {"stmt_call", "stmt_assign", "stmt_assign_nil", "stmt_assign_expr", "stmt_assign_index", "stmt_call_chain", 0};
     char* lua_buf = malloc(MAX_TEST_SIZE);
     char* json_buf = malloc(MAX_TEST_SIZE);
 
