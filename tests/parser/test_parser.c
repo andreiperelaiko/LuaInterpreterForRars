@@ -114,6 +114,76 @@ TEST(test_precedence){
     }
 }
 
+TEST(test_if){
+    const char* cases[] = {"if_simple", "if_else", "if_expr", "if_nested", "if_stmt_body", 0};
+    char* lua_buf = malloc(MAX_TEST_SIZE);
+    char* json_buf = malloc(MAX_TEST_SIZE);
+
+    for (int i = 0; cases[i]; i++){
+        load_test(cases[i], lua_buf, json_buf);
+        ASTNode* expected = ast_load(json_buf);
+        TokStream stream = get_t_stream(lua_buf);
+        ASTNode* got = parse_stmt(&stream);
+        ASSERT_STR(ast_dump(got), ast_dump(expected));
+    }
+}
+
+TEST(test_loops){
+    const char* cases[] = {"while_simple", "while_if", "for_simple", "for_while", 0};
+    char* lua_buf = malloc(MAX_TEST_SIZE);
+    char* json_buf = malloc(MAX_TEST_SIZE);
+
+    for (int i = 0; cases[i]; i++){
+        load_test(cases[i], lua_buf, json_buf);
+        ASTNode* expected = ast_load(json_buf);
+        TokStream stream = get_t_stream(lua_buf);
+        ASTNode* got = parse_stmt(&stream);
+        ASSERT_STR(ast_dump(got), ast_dump(expected));
+    }
+}
+
+TEST(test_stmt_call_assign){
+    const char* cases[] = {"stmt_call", "stmt_assign", "stmt_assign_expr", "stmt_assign_index", "stmt_call_chain", 0};
+    char* lua_buf = malloc(MAX_TEST_SIZE);
+    char* json_buf = malloc(MAX_TEST_SIZE);
+
+    for (int i = 0; cases[i]; i++){
+        load_test(cases[i], lua_buf, json_buf);
+        ASTNode* expected = ast_load(json_buf);
+        TokStream stream = get_t_stream(lua_buf);
+        ASTNode* got = parse_stmt(&stream);
+        ASSERT_STR(ast_dump(got), ast_dump(expected));
+    }
+}
+
+TEST(test_stmt_function){
+    const char* cases[] = {"stmt_func_empty", "stmt_func_params", "stmt_func_body", 0};
+    char* lua_buf = malloc(MAX_TEST_SIZE);
+    char* json_buf = malloc(MAX_TEST_SIZE);
+
+    for (int i = 0; cases[i]; i++){
+        load_test(cases[i], lua_buf, json_buf);
+        ASTNode* expected = ast_load(json_buf);
+        TokStream stream = get_t_stream(lua_buf);
+        ASTNode* got = parse_stmt(&stream);
+        ASSERT_STR(ast_dump(got), ast_dump(expected));
+    }
+}
+
+TEST(test_block){
+    const char* cases[] = {"block_mixed", "block_func_loop", 0};
+    char* lua_buf = malloc(MAX_TEST_SIZE);
+    char* json_buf = malloc(MAX_TEST_SIZE);
+
+    for (int i = 0; cases[i]; i++){
+        load_test(cases[i], lua_buf, json_buf);
+        ASTNode* expected = ast_load(json_buf);
+        TokStream stream = get_t_stream(lua_buf);
+        ASTNode* got = parse_block(&stream);
+        ASSERT_STR(ast_dump(got), ast_dump(expected));
+    }
+}
+
 TEST(test_nested){
     const char* cases[] = {"method_call", "chain", "nested_calls", 0};
     char* lua_buf = malloc(MAX_TEST_SIZE);
@@ -137,6 +207,11 @@ int main(){
     RUN(test_idx);
     RUN(test_call);
     RUN(test_nested);
+    RUN(test_if);
+    RUN(test_loops);
+    RUN(test_stmt_call_assign);
+    RUN(test_stmt_function);
+    RUN(test_block);
     
     test_summary(&_t);
     return _t.failed;

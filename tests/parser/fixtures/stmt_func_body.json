@@ -1,0 +1,1 @@
+{"type":"FUNC_STMT","name":"init","params":["x"],"body":{"type":"BLOCK","body":[{"type":"ASSIGN_STMT","lhs":{"type":"ID","value":"y"},"rhs":{"type":"ID","value":"x"}},{"type":"CALL_STMT","call":{"type":"CALL","calle":{"type":"ID","value":"foo"},"args":[]}}]}}

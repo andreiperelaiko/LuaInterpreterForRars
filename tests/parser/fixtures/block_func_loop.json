@@ -1,0 +1,108 @@
+{
+    "type": "BLOCK",
+    "body": [
+        {
+            "type": "FUNC_STMT",
+            "name": "inc",
+            "params": [
+                "x"
+            ],
+            "body": {
+                "type": "BLOCK",
+                "body": [
+                    {
+                        "type": "ASSIGN_STMT",
+                        "lhs": {
+                            "type": "ID",
+                            "value": "x"
+                        },
+                        "rhs": {
+                            "type": "ADD",
+                            "lhs": {
+                                "type": "ID",
+                                "value": "x"
+                            },
+                            "rhs": {
+                                "type": "NUM",
+                                "value": "1"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "CALL_STMT",
+            "call": {
+                "type": "CALL",
+                "calle": {
+                    "type": "ID",
+                    "value": "inc"
+                },
+                "args": [
+                    {
+                        "type": "NUM",
+                        "value": "1"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "WHILE",
+            "cond": {
+                "type": "ID",
+                "value": "cond"
+            },
+            "body": {
+                "type": "BLOCK",
+                "body": [
+                    {
+                        "type": "CALL_STMT",
+                        "call": {
+                            "type": "CALL",
+                            "calle": {
+                                "type": "ID",
+                                "value": "inc"
+                            },
+                            "args": [
+                                {
+                                    "type": "NUM",
+                                    "value": "2"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "FOR",
+            "name": "i",
+            "in": {
+                "type": "ID",
+                "value": "items"
+            },
+            "body": {
+                "type": "BLOCK",
+                "body": [
+                    {
+                        "type": "CALL_STMT",
+                        "call": {
+                            "type": "CALL",
+                            "calle": {
+                                "type": "ID",
+                                "value": "inc"
+                            },
+                            "args": [
+                                {
+                                    "type": "ID",
+                                    "value": "i"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

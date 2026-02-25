@@ -1,0 +1,1 @@
+{"type":"IF","cond":{"type":"GT","lhs":{"type":"ID","value":"a"},"rhs":{"type":"NUM","value":"0"}},"then":{"type":"BLOCK","body":[{"type":"WHILE","cond":{"type":"ID","value":"b"},"body":{"type":"BLOCK","body":[]}}]},"else":null}

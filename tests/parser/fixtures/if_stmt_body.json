@@ -1,0 +1,1 @@
+{"type":"IF","cond":{"type":"ID","value":"a"},"then":{"type":"BLOCK","body":[{"type":"ASSIGN_STMT","lhs":{"type":"ID","value":"x"},"rhs":{"type":"NUM","value":"1"}},{"type":"CALL_STMT","call":{"type":"CALL","calle":{"type":"ID","value":"foo"},"args":[]}}]},"else":{"type":"BLOCK","body":[{"type":"ASSIGN_STMT","lhs":{"type":"ID","value":"y"},"rhs":{"type":"NUM","value":"2"}}]}}

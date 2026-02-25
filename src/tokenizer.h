@@ -10,6 +10,7 @@
 typedef enum {
     TokError,     
     TokInt,
+    TokAssign,    // =
     TokPlus,      // + 
     TokMinus,     // -
     TokSlash,     // /
@@ -32,9 +33,20 @@ typedef enum {
     TokLParen,    // (
     TokRParen,    // )
     TokStar,      // *
+    TokIf,        // if
+    TokThen,      // then
+    TokElse,      // else
+    TokEnd,       // end
+    TokWhile,     // while
+    TokFor,       // for
+    TokDo,        // do
+    TokIn,        // in
+    TokFunction,  // function
     TokIdent,
     TokString,
 } TokenType;
+
+#define TOKEN_TYPE_COUNT (TokString + 1)
 
 typedef struct {
     TokenType type;
@@ -65,6 +77,7 @@ Token parseTokInt(CharStream* stream);
 Token parseTokMinus(CharStream* stream);
 Token parseTokSlash(CharStream* stream);
 Token parseTokExpr(CharStream* stream);
+Token parseTokAssign(CharStream* stream);
 Token parseTokEqual(CharStream* stream);
 Token parseTokNotequal(CharStream* stream);
 Token parseTokLEq(CharStream* stream);
@@ -84,6 +97,15 @@ Token parseTokString(CharStream* stream);
 Token parseTokLParen(CharStream* stream);
 Token parseTokRParen(CharStream* stream);
 Token parseTokNot(CharStream* stream);
+Token parseTokIf(CharStream* stream);
+Token parseTokThen(CharStream* stream);
+Token parseTokElse(CharStream* stream);
+Token parseTokEnd(CharStream* stream);
+Token parseTokWhile(CharStream* stream);
+Token parseTokFor(CharStream* stream);
+Token parseTokDo(CharStream* stream);
+Token parseTokIn(CharStream* stream);
+Token parseTokFunction(CharStream* stream);
 Token parseTokStar(CharStream* stream);
 Token parseTokIdent(CharStream* stream);
 VecTokens tokenize(CharStream* stream);

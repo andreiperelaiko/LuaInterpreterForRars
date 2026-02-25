@@ -26,6 +26,16 @@ java -jar rars1_6.jar program.s
 Подмножество [грамматики Lua 4.1](http://lua-users.org/wiki/LuaFourOneGrammar):
 
 ```
+stmt    --> if_stmt | while_stmt | for_stmt
+
+if_stmt --> IF expr THEN block [ ELSE block ] END
+
+while_stmt --> WHILE expr DO block END
+
+for_stmt --> FOR name IN expr DO block END
+
+block   --> { stmt }
+
 expr    --> primary | expr binop expr | unop expr | '(' expr ')'
 
 primary --> number | string | name { suffix }
