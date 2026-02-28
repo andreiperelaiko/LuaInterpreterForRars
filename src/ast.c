@@ -11,6 +11,7 @@ static const char *type_names[AST_NODE_TYPE_COUNT] = {
 	[EXP] = "EXP", [EQ] = "EQ",   [NEQ] = "NEQ", [LEQ] = "LEQ",
 	[GEQ] = "GEQ", [LT] = "LT",   [GT] = "GT",   [AND] = "AND",
 	[OR] = "OR",   [NIL] = "NIL",  [NUM] = "NUM",  [ID] = "ID",   [STRING] = "STRING",
+	[TABLE] = "TABLE",
 	[IDX] = "IDX", [CALL] = "CALL",
 	[NOT] = "NOT", [NEG] = "NEG",
 	[IF_STMT] = "IF", [BLOCK] = "BLOCK",
@@ -73,6 +74,15 @@ const char* string_dump(const ASTNode* root){
 	char *s = str_concat("{\"type\":\"STRING\",\"value\":\"",
 							root->data.string.value);
 	return str_concat(s, "\"}");
+}
+const char* table_dump(const ASTNode* root){
+	char *s = "{\"type\":\"TABLE\",\"items\":[";
+	for (unsigned int i = 0; i < root->data.table.items_cnt; i++) {
+		if (i > 0)
+			s = str_concat(s, ",");
+		s = str_concat(s, ast_dump(root->data.table.items[i]));
+	}
+	return str_concat(s, "]}");
 }
 const char* idx_dump(const ASTNode* root){
 	char *s = str_concat("{\"type\":\"IDX\",\"container\":",
@@ -194,6 +204,7 @@ const char *ast_dump(const ASTNode *root) {
 		[NUM] = num_dump,
 		[ID]  = id_dump,
 		[STRING] = string_dump,
+		[TABLE] = table_dump,
 		[IDX] = idx_dump,
 		[CALL] = call_dump,
 		[BLOCK] = block_dump,
@@ -257,6 +268,8 @@ ASTNodeType json_parse_type(const char *s) {
 }
 
 ASTNode *json_load_block(CharStream *stream);
+int json_load_list(CharStream *stream, ASTNode ***out, unsigned int *out_cnt,
+		   int max_items);
 
 int binop_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
 	if (!try_consume_with_ws(stream, ",\"lhs\":"))
@@ -318,6 +331,19 @@ int string_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
 	const char *val = json_read_string(stream);
 	result->type = type;
 	result->data.string.value = val;
+	return 1;
+}
+
+int table_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
+	if (!try_consume_with_ws(stream, ",\"items\":"))
+		return 0;
+	ASTNode **items;
+	unsigned int items_cnt;
+	if (!json_load_list(stream, &items, &items_cnt, MAX_TABLE_ITEMS))
+		return 0;
+	result->type = type;
+	result->data.table.items = items;
+	result->data.table.items_cnt = items_cnt;
 	return 1;
 }
 
@@ -578,6 +604,7 @@ static loader loaders[AST_NODE_TYPE_COUNT] = {
 	[NUM] = num_load,
 	[ID]  = id_load,
 	[STRING] = string_load,
+	[TABLE] = table_load,
 	[IDX] = idx_load,
 	[CALL] = call_load,
 	[BLOCK] = block_load,

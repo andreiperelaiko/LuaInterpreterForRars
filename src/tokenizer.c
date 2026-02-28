@@ -273,6 +273,24 @@ Token parseTokRBracket(CharStream* stream){
     return error_token;
 }
 
+Token parseTokLBrace(CharStream* stream){
+    if (cs_peek(stream) == '{'){
+        cs_get(stream);
+        Token token = {TokLBrace, 0};
+        return token;
+    }
+    return error_token;
+}
+
+Token parseTokRBrace(CharStream* stream){
+    if (cs_peek(stream) == '}'){
+        cs_get(stream);
+        Token token = {TokRBrace, 0};
+        return token;
+    }
+    return error_token;
+}
+
 Token parseTokColon(CharStream* stream){
     if (cs_peek(stream) == ':'){
         cs_get(stream);
@@ -529,6 +547,12 @@ VecTokens tokenize(CharStream* stream){
             add_token(&tokens, token);
         }
         else if((token = parseTokRBracket(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokLBrace(stream)).type != TokError) {
+            add_token(&tokens, token);
+        }
+        else if((token = parseTokRBrace(stream)).type != TokError) {
             add_token(&tokens, token);
         }
         else if((token = parseTokComma(stream)).type != TokError) {

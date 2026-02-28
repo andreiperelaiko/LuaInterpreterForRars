@@ -1,0 +1,1 @@
+{"type":"TABLE","items":[{"type":"NUM","value":"1"},{"type":"STRING","value":"a"},{"type":"NIL"},{"type":"ADD","lhs":{"type":"ID","value":"x"},"rhs":{"type":"NUM","value":"2"}}]}
