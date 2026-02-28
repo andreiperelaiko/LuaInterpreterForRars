@@ -31,7 +31,7 @@ TokStream get_t_stream(const char* lua_code){
 }
 
 TEST(test_expr){
-    const char* cases[] = {"num", "nil", "sum", "mul", "long_sum", "sum_mul_precedence", 0};
+    const char* cases[] = {"num", "nil", "table_empty", "table_values", "sum", "mul", "long_sum", "sum_mul_precedence", 0};
     char* lua_buf = malloc(MAX_TEST_SIZE);
     char* json_buf = malloc(MAX_TEST_SIZE);
 

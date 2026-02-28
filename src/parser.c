@@ -5,6 +5,10 @@
 #include "tokenizer.h"
 #include "ast.h"
 
+#define MAX_CALL_EXPR_ITEMS MAX_CALL_ARGS
+#define MAX_TABLE_EXPR_ITEMS MAX_TABLE_ITEMS
+#define MAX_IDENT_LIST_ITEMS MAX_FUNC_PARAMS
+
 static int precedences[TOKEN_TYPE_COUNT] = {
 	[TokOr] = 1,    [TokAnd] = 2,
 	[TokEqual] = 3,  [TokNotequal] = 3,
@@ -67,17 +71,60 @@ ASTNode *parse_expr(TokStream *stream, int min_precedence) {
 	return left;
 }
 
-void parse_args(TokStream *stream, ASTNode *call) {
+int parse_expr_list(TokStream *stream, TokenType end_tok, ASTNode **items,
+		    unsigned int max_items, unsigned int *out_cnt) {
+	unsigned int cnt = 0;
+	if (tok_is(stream, end_tok)) {
+		*out_cnt = 0;
+		return 1;
+	}
+	if (cnt >= max_items)
+		return 0;
+	ASTNode *first = parse_expr(stream, 0);
+	if (!first)
+		return 0;
+	items[cnt++] = first;
+	while (try_consume(stream, TokComma)) {
+		if (cnt >= max_items)
+			return 0;
+		ASTNode *next = parse_expr(stream, 0);
+		if (!next)
+			return 0;
+		items[cnt++] = next;
+	}
+	*out_cnt = cnt;
+	return 1;
+}
+
+int parse_ident_list(TokStream *stream, TokenType end_tok, const char **items,
+		     unsigned int *out_cnt) {
+	unsigned int cnt = 0;
+	if (tok_is(stream, end_tok)) {
+		*out_cnt = 0;
+		return 1;
+	}
+	if (!tok_is(stream, TokIdent))
+		return 0;
+	if (cnt >= MAX_IDENT_LIST_ITEMS)
+		return 0;
+	items[cnt++] = ts_get(stream).value;
+	while (try_consume(stream, TokComma)) {
+		if (!tok_is(stream, TokIdent) || cnt >= MAX_IDENT_LIST_ITEMS)
+			return 0;
+		items[cnt++] = ts_get(stream).value;
+	}
+	*out_cnt = cnt;
+	return 1;
+}
+
+int parse_args(TokStream *stream, ASTNode *call) {
 	ASTNode **args = malloc(sizeof(ASTNode *) * MAX_CALL_ARGS);
 	unsigned int args_cnt = 0;
-	if (!tok_is(stream, TokRParen)) {
-		args[args_cnt++] = parse_expr(stream, 0);
-		while (try_consume(stream, TokComma)) {
-			args[args_cnt++] = parse_expr(stream, 0);
-		}
-	}
+	if (!parse_expr_list(stream, TokRParen, args, MAX_CALL_EXPR_ITEMS, &args_cnt))
+		return 0;
 	call->data.call.args_cnt = args_cnt;
 	call->data.call.args = args;
+	return 1;
 }
 
 ASTNode *suffix_dot(TokStream *stream, ASTNode *container) {
@@ -112,7 +159,8 @@ ASTNode *suffix_call(TokStream *stream, ASTNode *container) {
 	ASTNode *call = malloc(sizeof(*call));
 	call->type = CALL;
 	call->data.call.calle = container;
-	parse_args(stream, call);
+	if (!parse_args(stream, call))
+		return 0;
 	if (!try_consume(stream, TokRParen))
 		return 0;
 	return call;
@@ -197,6 +245,21 @@ ASTNode *nud_paren(TokStream *stream) {
 	return expr;
 }
 
+ASTNode* nud_brace(TokStream* stream) {
+	try_consume(stream, TokLBrace);
+	ASTNode **items = malloc(sizeof(ASTNode *) * MAX_TABLE_EXPR_ITEMS);
+	unsigned int items_cnt = 0;
+	if (!parse_expr_list(stream, TokRBrace, items, MAX_TABLE_EXPR_ITEMS, &items_cnt))
+		return 0;
+	if (!try_consume(stream, TokRBrace))
+		return 0;
+	ASTNode *node = malloc(sizeof(*node));
+	node->type = TABLE;
+	node->data.table.items = items;
+	node->data.table.items_cnt = items_cnt;
+	return node;
+}
+
 typedef ASTNode *(*nud_parser)(TokStream *stream);
 
 static nud_parser nud_parsers[TOKEN_TYPE_COUNT] = {
@@ -205,6 +268,7 @@ static nud_parser nud_parsers[TOKEN_TYPE_COUNT] = {
 	[TokString] = nud_string,
 	[TokNil] = nud_nil,
 	[TokLParen] = nud_paren,
+	[TokLBrace] = nud_brace,
 	[TokNot] = nud_not,
 	[TokMinus] = nud_neg,
 };
@@ -309,16 +373,8 @@ ASTNode *stmt_function(TokStream *stream) {
 		return 0;
 	const char **params = malloc(sizeof(const char *) * MAX_FUNC_PARAMS);
 	unsigned int params_cnt = 0;
-	if (!tok_is(stream, TokRParen)) {
-		if (!tok_is(stream, TokIdent))
-			return 0;
-		params[params_cnt++] = ts_get(stream).value;
-		while (try_consume(stream, TokComma)) {
-			if (!tok_is(stream, TokIdent))
-				return 0;
-			params[params_cnt++] = ts_get(stream).value;
-		}
-	}
+	if (!parse_ident_list(stream, TokRParen, params, &params_cnt))
+		return 0;
 	if (!try_consume(stream, TokRParen))
 		return 0;
 	ASTNode *body = parse_block(stream);

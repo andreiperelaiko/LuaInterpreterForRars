@@ -20,6 +20,7 @@ typedef enum {
     NUM,
     ID,
     STRING,
+    TABLE,
     IDX,
     CALL,
     NOT,
@@ -69,6 +70,12 @@ typedef struct{
     unsigned int args_cnt;
 } Call;
 
+#define MAX_TABLE_ITEMS 64
+typedef struct{
+    ASTNode** items;
+    unsigned int items_cnt;
+} Table;
+
 #define MAX_BLOCK_STMTS 100
 typedef struct{
     ASTNode** stmts;
@@ -115,6 +122,7 @@ struct ASTNode {
         Number number;
         Ident ident;
         String string;
+        Table table;
         BinOp binop;
         UnOp unop;
         Index index;

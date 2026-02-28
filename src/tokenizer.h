@@ -29,6 +29,8 @@ typedef enum {
     TokColon,     // :
     TokLBracket,  // [
     TokRBracket,  // ]
+    TokLBrace,    // {
+    TokRBrace,    // }
     TokNot,       // not
     TokLParen,    // (
     TokRParen,    // )
@@ -92,6 +94,8 @@ Token parseTokComma(CharStream* stream);
 Token parseTokDDot(CharStream* stream);
 Token parseTokLBracket(CharStream* stream);
 Token parseTokRBracket(CharStream* stream);
+Token parseTokLBrace(CharStream* stream);
+Token parseTokRBrace(CharStream* stream);
 Token parseTokColon(CharStream* stream);
 Token parseTokPlus(CharStream* stream);
 Token parseTokString(CharStream* stream);
