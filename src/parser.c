@@ -255,8 +255,8 @@ ASTNode* nud_brace(TokStream* stream) {
 		return 0;
 	ASTNode *node = malloc(sizeof(*node));
 	node->type = TABLE;
-	node->data.table.items = items;
-	node->data.table.items_cnt = items_cnt;
+	node->data.table_cons.items = items;
+	node->data.table_cons.items_cnt = items_cnt;
 	return node;
 }
 
@@ -324,6 +324,37 @@ ASTNode *stmt_for(TokStream *stream) {
 	if (!tok_is(stream, TokIdent))
 		return 0;
 	Token var = ts_get(stream);
+	if (try_consume(stream, TokAssign)) {
+		ASTNode *start = parse_expr(stream, 0);
+		if (!start || !try_consume(stream, TokComma))
+			return 0;
+		ASTNode *stop = parse_expr(stream, 0);
+		if (!stop)
+			return 0;
+		ASTNode *step = 0;
+		if (try_consume(stream, TokComma)) {
+			step = parse_expr(stream, 0);
+			if (!step)
+				return 0;
+		} else {
+			step = malloc(sizeof(*step));
+			step->type = NUM;
+			step->data.number.value = "1";
+		}
+		if (!try_consume(stream, TokDo))
+			return 0;
+		ASTNode *body = parse_block(stream);
+		if (!body || !try_consume(stream, TokEnd))
+			return 0;
+		ASTNode *node = malloc(sizeof(*node));
+		node->type = FOR_NUM_STMT;
+		node->data.for_num_node.name = var.value;
+		node->data.for_num_node.start = start;
+		node->data.for_num_node.stop = stop;
+		node->data.for_num_node.step = step;
+		node->data.for_num_node.body = body;
+		return node;
+	}
 	if (!try_consume(stream, TokIn))
 		return 0;
 	ASTNode *iterable = parse_expr(stream, 0);
@@ -389,10 +420,27 @@ ASTNode *stmt_function(TokStream *stream) {
 	return node;
 }
 
+ASTNode *stmt_return(TokStream *stream) {
+	if (!try_consume(stream, TokReturn))
+		return 0;
+	ASTNode *value = 0;
+	TokenType t = ts_peek(stream).type;
+	if (t != TokError && t != TokElse && t != TokEnd) {
+		value = parse_expr(stream, 0);
+		if (!value)
+			return 0;
+	}
+	ASTNode *node = malloc(sizeof(*node));
+	node->type = RETURN_STMT;
+	node->data.return_stmt.value = value;
+	return node;
+}
+
 typedef ASTNode* (*stmt_parser)(TokStream* stream);
 static stmt_parser stmts_parsers[TOKEN_TYPE_COUNT] = {
 	[TokIdent] = stmt_call_or_assign,
 	[TokFunction] = stmt_function,
+	[TokReturn] = stmt_return,
 	[TokFor] = stmt_for,
 	[TokWhile] = stmt_while,
 	[TokIf] = stmt_if,

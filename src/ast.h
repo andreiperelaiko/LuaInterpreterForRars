@@ -29,12 +29,14 @@ typedef enum {
     BLOCK,
     WHILE_STMT,
     FOR_STMT,
+    FOR_NUM_STMT,
     CALL_STMT,
     ASSIGN_STMT,
     FUNC_STMT,
+    RETURN_STMT,
 } ASTNodeType;
 
-#define AST_NODE_TYPE_COUNT (FUNC_STMT + 1)
+#define AST_NODE_TYPE_COUNT (RETURN_STMT + 1)
 
 typedef struct ASTNode ASTNode;
 
@@ -74,7 +76,7 @@ typedef struct{
 typedef struct{
     ASTNode** items;
     unsigned int items_cnt;
-} Table;
+} TableCons;
 
 #define MAX_BLOCK_STMTS 100
 typedef struct{
@@ -100,6 +102,14 @@ typedef struct{
 } ForNode;
 
 typedef struct{
+    const char* name;
+    ASTNode* start;
+    ASTNode* stop;
+    ASTNode* step;
+    ASTNode* body;
+} ForNumNode;
+
+typedef struct{
     ASTNode* call;
 } CallStmt;
 
@@ -116,13 +126,17 @@ typedef struct{
     ASTNode* body;
 } FuncStmt;
 
+typedef struct{
+    ASTNode* value;
+} ReturnStmt;
+
 struct ASTNode {
     ASTNodeType type; 
     union {
         Number number;
         Ident ident;
         String string;
-        Table table;
+        TableCons table_cons;
         BinOp binop;
         UnOp unop;
         Index index;
@@ -131,9 +145,11 @@ struct ASTNode {
         IfNode if_node;
         WhileNode while_node;
         ForNode for_node;
+        ForNumNode for_num_node;
         CallStmt call_stmt;
         AssignStmt assign_stmt;
         FuncStmt func_stmt;
+        ReturnStmt return_stmt;
     } data;
 };
 

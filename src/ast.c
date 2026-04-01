@@ -16,8 +16,10 @@ static const char *type_names[AST_NODE_TYPE_COUNT] = {
 	[NOT] = "NOT", [NEG] = "NEG",
 	[IF_STMT] = "IF", [BLOCK] = "BLOCK",
 	[WHILE_STMT] = "WHILE", [FOR_STMT] = "FOR",
+	[FOR_NUM_STMT] = "FOR_NUM",
 	[CALL_STMT] = "CALL_STMT", [ASSIGN_STMT] = "ASSIGN_STMT",
 	[FUNC_STMT] = "FUNC_STMT",
+	[RETURN_STMT] = "RETURN_STMT",
 };
 
 const char *ast_type_name(ASTNodeType type) {
@@ -77,10 +79,10 @@ const char* string_dump(const ASTNode* root){
 }
 const char* table_dump(const ASTNode* root){
 	char *s = "{\"type\":\"TABLE\",\"items\":[";
-	for (unsigned int i = 0; i < root->data.table.items_cnt; i++) {
+	for (unsigned int i = 0; i < root->data.table_cons.items_cnt; i++) {
 		if (i > 0)
 			s = str_concat(s, ",");
-		s = str_concat(s, ast_dump(root->data.table.items[i]));
+		s = str_concat(s, ast_dump(root->data.table_cons.items[i]));
 	}
 	return str_concat(s, "]}");
 }
@@ -160,6 +162,19 @@ const char* for_dump(const ASTNode* root){
 	s = str_concat(s, ast_dump(root->data.for_node.body));
 	return str_concat(s, "}");
 }
+const char* for_num_dump(const ASTNode* root){
+	char *s = str_concat("{\"type\":\"FOR_NUM\",\"name\":\"",
+						root->data.for_num_node.name);
+	s = str_concat(s, "\",\"start\":");
+	s = str_concat(s, ast_dump(root->data.for_num_node.start));
+	s = str_concat(s, ",\"stop\":");
+	s = str_concat(s, ast_dump(root->data.for_num_node.stop));
+	s = str_concat(s, ",\"step\":");
+	s = str_concat(s, ast_dump(root->data.for_num_node.step));
+	s = str_concat(s, ",\"body\":");
+	s = str_concat(s, ast_dump(root->data.for_num_node.body));
+	return str_concat(s, "}");
+}
 const char* call_stmt_dump(const ASTNode* root){
 	char *s = str_concat("{\"type\":\"CALL_STMT\",\"call\":",
 						ast_dump(root->data.call_stmt.call));
@@ -187,6 +202,11 @@ const char* func_stmt_dump(const ASTNode* root){
 	s = str_concat(s, ast_dump(root->data.func_stmt.body));
 	return str_concat(s, "}");
 }
+const char* return_stmt_dump(const ASTNode* root){
+	char *s = str_concat("{\"type\":\"RETURN_STMT\",\"value\":",
+						ast_dump(root->data.return_stmt.value));
+	return str_concat(s, "}");
+}
 
 typedef const char* (*dumper)(const ASTNode* root);
 
@@ -211,9 +231,11 @@ const char *ast_dump(const ASTNode *root) {
 		[IF_STMT] = if_dump,
 		[WHILE_STMT] = while_dump,
 		[FOR_STMT] = for_dump,
+		[FOR_NUM_STMT] = for_num_dump,
 		[CALL_STMT] = call_stmt_dump,
 		[ASSIGN_STMT] = assign_stmt_dump,
 		[FUNC_STMT] = func_stmt_dump,
+		[RETURN_STMT] = return_stmt_dump,
 	};
 	
 	if (root == 0)
@@ -342,8 +364,8 @@ int table_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
 	if (!json_load_list(stream, &items, &items_cnt, MAX_TABLE_ITEMS))
 		return 0;
 	result->type = type;
-	result->data.table.items = items;
-	result->data.table.items_cnt = items_cnt;
+	result->data.table_cons.items = items;
+	result->data.table_cons.items_cnt = items_cnt;
 	return 1;
 }
 
@@ -501,6 +523,41 @@ int for_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
 	return 1;
 }
 
+int for_num_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
+	if (!try_consume_with_ws(stream, ",\"name\":"))
+		return 0;
+	const char *name = json_read_string(stream);
+	if (!name)
+		return 0;
+	if (!try_consume_with_ws(stream, ",\"start\":"))
+		return 0;
+	ASTNode *start = json_load_block(stream);
+	if (!start)
+		return 0;
+	if (!try_consume_with_ws(stream, ",\"stop\":"))
+		return 0;
+	ASTNode *stop = json_load_block(stream);
+	if (!stop)
+		return 0;
+	if (!try_consume_with_ws(stream, ",\"step\":"))
+		return 0;
+	ASTNode *step = json_load_block(stream);
+	if (!step)
+		return 0;
+	if (!try_consume_with_ws(stream, ",\"body\":"))
+		return 0;
+	ASTNode *body = json_load_block(stream);
+	if (!body)
+		return 0;
+	result->type = type;
+	result->data.for_num_node.name = name;
+	result->data.for_num_node.start = start;
+	result->data.for_num_node.stop = stop;
+	result->data.for_num_node.step = step;
+	result->data.for_num_node.body = body;
+	return 1;
+}
+
 int call_stmt_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
 	if (!try_consume_with_ws(stream, ",\"call\":"))
 		return 0;
@@ -589,6 +646,24 @@ int func_stmt_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
 	return 1;
 }
 
+int return_stmt_load(CharStream *stream, ASTNode *result, ASTNodeType type) {
+	if (!try_consume_with_ws(stream, ",\"value\":"))
+		return 0;
+	ASTNode *value = 0;
+	skipWhitespace(stream);
+	if (!cs_eof(stream) && cs_peek(stream) != 'n') {
+		value = json_load_block(stream);
+		if (!value)
+			return 0;
+	} else {
+		if (!try_consume_null(stream))
+			return 0;
+	}
+	result->type = type;
+	result->data.return_stmt.value = value;
+	return 1;
+}
+
 typedef int (*loader)(CharStream *stream, ASTNode *result, ASTNodeType type);
 
 static loader loaders[AST_NODE_TYPE_COUNT] = {
@@ -611,9 +686,11 @@ static loader loaders[AST_NODE_TYPE_COUNT] = {
 	[IF_STMT] = if_load,
 	[WHILE_STMT] = while_load,
 	[FOR_STMT] = for_load,
+	[FOR_NUM_STMT] = for_num_load,
 	[CALL_STMT] = call_stmt_load,
 	[ASSIGN_STMT] = assign_stmt_load,
 	[FUNC_STMT] = func_stmt_load,
+	[RETURN_STMT] = return_stmt_load,
 };
 
 ASTNode *json_load_block(CharStream *stream) {

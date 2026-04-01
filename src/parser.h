@@ -11,3 +11,4 @@ ASTNode* parse_expr(TokStream* stream, int precedence);
 ASTNode* parse_nud(TokStream* stream);
 ASTNode* parse_stmt(TokStream* stream);
 ASTNode* parse_block(TokStream* stream);
+ASTNode* stmt_return(TokStream* stream);

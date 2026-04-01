@@ -44,6 +44,7 @@ typedef enum {
     TokDo,        // do
     TokIn,        // in
     TokFunction,  // function
+    TokReturn,    // return
     TokNil,       // nil
     TokIdent,
     TokString,
@@ -111,6 +112,7 @@ Token parseTokFor(CharStream* stream);
 Token parseTokDo(CharStream* stream);
 Token parseTokIn(CharStream* stream);
 Token parseTokFunction(CharStream* stream);
+Token parseTokReturn(CharStream* stream);
 Token parseTokNil(CharStream* stream);
 Token parseTokStar(CharStream* stream);
 Token parseTokIdent(CharStream* stream);
