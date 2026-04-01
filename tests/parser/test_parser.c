@@ -129,7 +129,7 @@ TEST(test_if){
 }
 
 TEST(test_loops){
-    const char* cases[] = {"while_simple", "while_if", "for_simple", "for_while", 0};
+    const char* cases[] = {"while_simple", "while_if", "for_simple", "for_while", "for_num_simple", 0};
     char* lua_buf = malloc(MAX_TEST_SIZE);
     char* json_buf = malloc(MAX_TEST_SIZE);
 
@@ -158,6 +158,20 @@ TEST(test_stmt_call_assign){
 
 TEST(test_stmt_function){
     const char* cases[] = {"stmt_func_empty", "stmt_func_params", "stmt_func_body", 0};
+    char* lua_buf = malloc(MAX_TEST_SIZE);
+    char* json_buf = malloc(MAX_TEST_SIZE);
+
+    for (int i = 0; cases[i]; i++){
+        load_test(cases[i], lua_buf, json_buf);
+        ASTNode* expected = ast_load(json_buf);
+        TokStream stream = get_t_stream(lua_buf);
+        ASTNode* got = parse_stmt(&stream);
+        ASSERT_STR(ast_dump(got), ast_dump(expected));
+    }
+}
+
+TEST(test_stmt_return){
+    const char* cases[] = {"stmt_return", "stmt_return_empty", 0};
     char* lua_buf = malloc(MAX_TEST_SIZE);
     char* json_buf = malloc(MAX_TEST_SIZE);
 
@@ -211,6 +225,7 @@ int main(){
     RUN(test_loops);
     RUN(test_stmt_call_assign);
     RUN(test_stmt_function);
+    RUN(test_stmt_return);
     RUN(test_block);
     
     test_summary(&_t);

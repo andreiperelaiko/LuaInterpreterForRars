@@ -2,6 +2,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import re
+import sys
 
 class FileManager:
     def mkdir(self, path):
@@ -59,7 +60,7 @@ class RiscVCompiler:
         if not self.gcc:
             raise Exception("Cannot find riscv64 gcc: tried " + ", ".join(self.GCC_NAMES))
 
-    def compile(self, input_file, output_file, include_dirs=None):
+    def compile(self, input_file, output_file, include_dirs=None, defines=None):
         cmd = [
             str(self.gcc),
             "-S",
@@ -68,6 +69,9 @@ class RiscVCompiler:
             "-fno-builtin",
             "-nostdlib",
         ]
+        if defines:
+            for define in defines:
+                cmd.append(f"-D{define}")
         if include_dirs:
             for d in include_dirs:
                 cmd.extend(["-I", str(d)])
@@ -81,6 +85,7 @@ class RarsAdapter:
         re.compile(r'^\s*\.file\b'),
         re.compile(r'^\s*\.option\b'),
         re.compile(r'^\s*\.attribute\b'),
+        re.compile(r'^\s*\.globl\b'),
         re.compile(r'^\s*\.type\b'),
         re.compile(r'^\s*\.size\b'),
         re.compile(r'^\s*\.ident\b'),
@@ -88,7 +93,9 @@ class RarsAdapter:
     ]
 
     SECTION_REPLACE = [
+        (re.compile(r'^\s*\.bss\b.*'),                 '\t.data'),
         (re.compile(r'^\s*\.section\s+\.rodata\b.*'), '\t.data'),
+        (re.compile(r'^\s*\.section\s+\.bss\b.*'),    '\t.data'),
         (re.compile(r'^\s*\.section\s+\.sbss\b.*'),   '\t.data'),
     ]
 
@@ -137,12 +144,18 @@ MAIN_SOURCES = [
     Path("src/tokenizer.c"),
     Path("src/ast.c"),
     Path("src/parser.c"),
+    Path("src/interpreter.c"),
+    Path("src/lib/char_stream.c"),
+    Path("src/lib/compiler_rt.c"),
+    Path("src/lib/string.c"),
     Path("src/lib/io.S"),
     Path("src/lib/memory.S"),
+    Path("src/lib/fstream.S"),
 ]
 
 LIB_SOURCES = [
     Path("src/lib/char_stream.c"),
+    Path("src/lib/compiler_rt.c"),
     Path("src/lib/string.c"),
     Path("src/lib/test.c"),
     Path("src/lib/io.S"),
@@ -169,7 +182,7 @@ TEST_CONFIGS = {
     },
 }
 
-def build(sources, output):
+def build(sources, output, defines_by_source=None):
     fm = FileManager()
     tfs = TempFileSystem()
     compiler = RiscVCompiler()
@@ -180,7 +193,10 @@ def build(sources, output):
         if source.suffix == '.c':
             asm_name = source.stem + ".s"
             asm_path = tfs.register_file(asm_name)
-            compiler.compile(source, asm_path, include_dirs=["src"])
+            defines = []
+            if defines_by_source and source in defines_by_source:
+                defines = defines_by_source[source]
+            compiler.compile(source, asm_path, include_dirs=["src"], defines=defines)
             raw = fm.read(asm_path)
             parts.append(adapter.process(raw, source.stem))
         elif source.suffix == '.S':
@@ -192,8 +208,19 @@ def build(sources, output):
     fm.write(output, program)
     print(f"{output} ({program.count(chr(10))} lines)")
 
+def to_c_string_literal(value):
+    escaped = value.replace("\\", "\\\\").replace("\"", "\\\"")
+    return f"\"{escaped}\""
+
 if __name__ == "__main__":
-    build(MAIN_SOURCES, "program.s")
+    lua_script = "tests/interpreter/print.lua"
+    if len(sys.argv) > 1:
+        lua_script = sys.argv[1]
+
+    main_defines = {
+        Path("src/main.c"): [f"LUA_SCRIPT_PATH={to_c_string_literal(lua_script)}"]
+    }
+    build(MAIN_SOURCES, "program.s", defines_by_source=main_defines)
     for test_name, cfg in TEST_CONFIGS.items():
         print(f"--- test: {test_name} ---")
         build(cfg["sources"], cfg["output"])

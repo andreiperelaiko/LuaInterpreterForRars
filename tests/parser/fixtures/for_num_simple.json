@@ -1,0 +1,1 @@
+{"type":"FOR_NUM","name":"i","start":{"type":"NUM","value":"1"},"stop":{"type":"NUM","value":"3"},"step":{"type":"NUM","value":"1"},"body":{"type":"BLOCK","body":[]}}
